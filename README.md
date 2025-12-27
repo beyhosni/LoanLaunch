@@ -1,31 +1,184 @@
-# LoanLaunch - AI-Powered Intelligent Lending Platform
+# 🚀 LoanLaunch - AI-Powered Intelligent Lending Platform
+
+<div align="center">
+
+![Java](https://img.shields.io/badge/Java-21-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)
+![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2.1-6DB33F?style=for-the-badge&logo=spring-boot&logoColor=white)
+![Kafka](https://img.shields.io/badge/Apache%20Kafka-7.6.0-231F20?style=for-the-badge&logo=apache-kafka&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-316192?style=for-the-badge&logo=postgresql&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker&logoColor=white)
+![Maven](https://img.shields.io/badge/Maven-3.9+-C71A36?style=for-the-badge&logo=apache-maven&logoColor=white)
+
+**Plateforme de prêt intelligente pour petites entreprises basée sur l'IA et l'analyse de données alternatives**
+
+[Documentation](#-documentation-api) • [Quick Start](#-démarrage-rapide) • [Architecture](#-architecture) • [API](#-endpoints-principaux)
+
+</div>
+
+---
 
 ## 🎯 Overview
 
-LoanLaunch est une plateforme de prêt intelligente pour petites entreprises basée sur l'IA et l'analyse de données alternatives (cash-flow, SaaS, open banking). La plateforme automatise l'évaluation du risque pour fournir une décision de prêt en quelques heures au lieu de plusieurs semaines.
+LoanLaunch révolutionne le prêt aux petites entreprises en automatisant l'évaluation du risque grâce à l'analyse de données alternatives (cash-flow, SaaS metrics, open banking). 
+
+**Résultat :** Décision de prêt en quelques heures au lieu de plusieurs semaines.
+
+### ✨ Caractéristiques Principales
+
+- 🏗️ **Architecture Microservices** - 8 services indépendants et scalables
+- 📡 **Event-Driven** - Communication asynchrone via Apache Kafka
+- 🔐 **Sécurité JWT** - Authentification et autorisation robustes
+- 🐳 **Docker Ready** - Déploiement simplifié avec Docker Compose
+- 📊 **Observabilité** - Health checks et monitoring intégrés
+- 🎨 **Clean Architecture** - Hexagonal pattern pour chaque service
+
+---
 
 ## 🏗️ Architecture
 
-**Stack Technique :**
-- Java 21
-- Spring Boot 3.2.1
-- Apache Kafka (event-driven)
-- PostgreSQL (1 DB par service)
-- Docker & Docker Compose
-- Architecture Hexagonale
+### Stack Technologique
 
-### Microservices (8 services)
+```mermaid
+graph TB
+    subgraph "Frontend Layer"
+        UI[React/Vue Frontend]
+    end
+    
+    subgraph "API Layer"
+        GW[API Gateway<br/>Spring Cloud Gateway]
+    end
+    
+    subgraph "Microservices Layer"
+        AUTH[🔐 Auth Service<br/>:8081]
+        ORG[🏢 Organization Service<br/>:8082]
+        LOAN[💰 Loan Origination<br/>:8087]
+        ING[📥 Data Ingestion<br/>:8083]
+        SCORE[📊 Risk Scoring<br/>:8085]
+        DEC[⚖️ Decision Engine<br/>:8086]
+        NOTIF[📧 Notification<br/>:8088]
+        AUDIT[📝 Audit Service<br/>:8089]
+    end
+    
+    subgraph "Event Bus"
+        KAFKA[Apache Kafka<br/>Event Streaming]
+    end
+    
+    subgraph "Data Layer"
+        DB1[(PostgreSQL<br/>auth_db)]
+        DB2[(PostgreSQL<br/>org_db)]
+        DB3[(PostgreSQL<br/>loan_db)]
+        DB4[(PostgreSQL<br/>ingestion_db)]
+        DB5[(PostgreSQL<br/>scoring_db)]
+        DB6[(PostgreSQL<br/>decision_db)]
+        DB7[(PostgreSQL<br/>notification_db)]
+        DB8[(PostgreSQL<br/>audit_db)]
+    end
+    
+    UI --> GW
+    GW --> AUTH
+    GW --> ORG
+    GW --> LOAN
+    GW --> ING
+    
+    AUTH --> KAFKA
+    ORG --> KAFKA
+    LOAN --> KAFKA
+    ING --> KAFKA
+    SCORE --> KAFKA
+    DEC --> KAFKA
+    NOTIF --> KAFKA
+    AUDIT --> KAFKA
+    
+    KAFKA --> SCORE
+    KAFKA --> DEC
+    KAFKA --> NOTIF
+    KAFKA --> AUDIT
+    
+    AUTH --> DB1
+    ORG --> DB2
+    LOAN --> DB3
+    ING --> DB4
+    SCORE --> DB5
+    DEC --> DB6
+    NOTIF --> DB7
+    AUDIT --> DB8
+    
+    style KAFKA fill:#231F20,stroke:#fff,color:#fff
+    style UI fill:#61DAFB,stroke:#fff,color:#000
+    style GW fill:#6DB33F,stroke:#fff,color:#fff
+```
 
-| Service | Port | Description |
-|---------|------|-------------|
-| **organization-service** | 8082 | Gestion des organisations et utilisateurs |
-| **auth-service** | 8081 | Authentification JWT et gestion des utilisateurs |
-| **loan-origination-service** | 8087 | Gestion des demandes de prêt |
-| **data-ingestion-service** | 8083 | Ingestion de données bancaires (simulé) |
-| **risk-scoring-service** | 8085 | Calcul des scores de risque |
-| **decision-engine-service** | 8086 | Moteur de décision automatique |
-| **notification-service** | 8088 | Envoi de notifications |
-| **audit-service** | 8089 | Journalisation et audit trail |
+### 🎯 Microservices Overview
+
+<table>
+<thead>
+<tr>
+<th>Service</th>
+<th>Port</th>
+<th>Database</th>
+<th>Description</th>
+<th>Responsabilités Clés</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>🏢 Organization Service</strong></td>
+<td><code>8082</code></td>
+<td><code>organization_db:5432</code></td>
+<td>Gestion des organisations</td>
+<td>• CRUD organisations<br/>• Gestion utilisateurs<br/>• Validation métier</td>
+</tr>
+<tr>
+<td><strong>🔐 Auth Service</strong></td>
+<td><code>8081</code></td>
+<td><code>auth_db:5433</code></td>
+<td>Authentification & Autorisation</td>
+<td>• JWT tokens<br/>• Refresh tokens<br/>• Gestion rôles (BORROWER, UNDERWRITER, ADMIN)</td>
+</tr>
+<tr>
+<td><strong>💰 Loan Origination</strong></td>
+<td><code>8087</code></td>
+<td><code>loan_db:5437</code></td>
+<td>Gestion demandes de prêt</td>
+<td>• Création demandes<br/>• Workflow statuts<br/>• Soumission pour évaluation</td>
+</tr>
+<tr>
+<td><strong>📥 Data Ingestion</strong></td>
+<td><code>8083</code></td>
+<td><code>ingestion_db:5434</code></td>
+<td>Ingestion données bancaires</td>
+<td>• Simulation Open Banking<br/>• Stockage transactions<br/>• Déclenchement normalisation</td>
+</tr>
+<tr>
+<td><strong>📊 Risk Scoring</strong></td>
+<td><code>8085</code></td>
+<td><code>scoring_db:5435</code></td>
+<td>Calcul scores de risque</td>
+<td>• Analyse cash-flow<br/>• Scoring basé règles<br/>• Évaluation tendances</td>
+</tr>
+<tr>
+<td><strong>⚖️ Decision Engine</strong></td>
+<td><code>8086</code></td>
+<td><code>decision_db:5436</code></td>
+<td>Décisions automatiques</td>
+<td>• Application règles métier<br/>• Décision APPROVE/REJECT<br/>• Révision manuelle</td>
+</tr>
+<tr>
+<td><strong>📧 Notification</strong></td>
+<td><code>8088</code></td>
+<td><code>notification_db:5438</code></td>
+<td>Envoi notifications</td>
+<td>• Emails transactionnels<br/>• Templates<br/>• Historique envois</td>
+</tr>
+<tr>
+<td><strong>📝 Audit Service</strong></td>
+<td><code>8089</code></td>
+<td><code>audit_db:5439</code></td>
+<td>Audit & Compliance</td>
+<td>• Event logging<br/>• Audit trail complet<br/>• Support compliance</td>
+</tr>
+</tbody>
+</table>
 
 ## 🚀 Démarrage Rapide
 
