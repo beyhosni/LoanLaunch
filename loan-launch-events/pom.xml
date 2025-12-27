@@ -18,11 +18,7 @@
     <description>Event definitions and Kafka configuration</description>
 
     <dependencies>
-        <!-- Common Library -->
-        <dependency>
-            <groupId>com.loanllaunch</groupId>
-            <artifactId>loan-launch-common</artifactId>
-        </dependency>
+
 
         <!-- Spring Kafka -->
         <dependency>

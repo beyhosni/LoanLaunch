@@ -39,6 +39,39 @@ LoanLaunch révolutionne le prêt aux petites entreprises en automatisant l'éva
 ### Stack Technologique
 
 ```mermaid
+mindmap
+  root((LoanLaunch))
+    Backend
+      Java 21
+      Spring Boot 3.2
+      Spring Security
+      Spring Data JPA
+      Lombok
+      MapStruct
+    Frontend
+      Angular 17
+      Angular Material
+      OIDC Client
+      RxJS
+    Infrastructure
+      Docker
+      Docker Compose
+      PostgreSQL 16
+      Flyway
+    Eventing
+      Apache Kafka
+      Spring Cloud Stream
+      Zookeeper
+    Tools
+      Maven
+      Git
+      Kafka UI
+      Swagger/OpenAPI
+```
+
+### 🕌 Architecture Globale
+
+```mermaid
 graph TB
     subgraph "Frontend Layer"
         UI[React/Vue Frontend]
@@ -691,45 +724,7 @@ Built with ❤️ by the LoanLaunch Team
 
 </div>
 
-```mermaid
-sequenceDiagram
-    participant Client
-    participant Auth
-    participant Org
-    participant Loan
-    participant Ingestion
-    participant Scoring
-    participant Decision
-    participant Notification
-    participant Kafka
 
-    Client->>Auth: POST /auth/register
-    Auth->>Kafka: UserRegisteredEvent
-    Auth-->>Client: JWT Token
-
-    Client->>Org: POST /organizations
-    Org->>Kafka: OrganizationCreatedEvent
-    Org-->>Client: Organization
-
-    Client->>Ingestion: POST /ingestion/sync/{orgId}
-    Ingestion->>Kafka: BankDataIngestedEvent
-
-    Kafka->>Scoring: Consume BankDataIngested
-    Scoring->>Kafka: RiskScoreCalculatedEvent
-
-    Kafka->>Decision: Consume RiskScoreCalculated
-    Decision->>Kafka: LoanDecisionMadeEvent
-
-    Client->>Loan: POST /loans
-    Loan->>Kafka: LoanApplicationCreatedEvent
-    Loan-->>Client: LoanApplication
-
-    Client->>Loan: POST /loans/{id}/submit
-    Loan->>Kafka: LoanApplicationSubmittedEvent
-
-    Kafka->>Notification: Consume Events
-    Notification->>Client: Email Notification
-```
 
 ## 📊 Événements Kafka
 

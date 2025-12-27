@@ -26,7 +26,7 @@ import java.util.UUID;
 public class LoanApplicationService {
 
     private final LoanApplicationRepository loanApplicationRepository;
-    private final KafkaTemplate<String, Object> kafkaTemplate;
+    private final com.loanllaunch.common.application.service.OutboxService outboxService;
 
     @Transactional
     public LoanApplication createLoanApplication(UUID organizationId, BigDecimal requestedAmount, 
@@ -46,7 +46,7 @@ public class LoanApplicationService {
 
         LoanApplication saved = loanApplicationRepository.save(application);
 
-        // Publish event
+        // Publish event via Outbox
         LoanApplicationCreatedEvent event = new LoanApplicationCreatedEvent(
                 saved.getId(),
                 new LoanApplicationCreatedEvent.LoanApplicationCreatedPayload(
@@ -59,7 +59,7 @@ public class LoanApplicationService {
                         saved.getStatus().name()
                 )
         );
-        kafkaTemplate.send(KafkaTopics.LOAN_EVENTS, saved.getId().toString(), event);
+        outboxService.saveEvent(event, KafkaTopics.LOAN_EVENTS, saved.getOrganizationId().toString());
 
         log.info("Loan application created: {}", saved.getApplicationNumber());
         return saved;
@@ -81,7 +81,7 @@ public class LoanApplicationService {
         
         LoanApplication saved = loanApplicationRepository.save(application);
 
-        // Publish event
+        // Publish event via Outbox
         LoanApplicationSubmittedEvent event = new LoanApplicationSubmittedEvent(
                 saved.getId(),
                 new LoanApplicationSubmittedEvent.LoanApplicationSubmittedPayload(
@@ -91,7 +91,7 @@ public class LoanApplicationService {
                         saved.getSubmittedAt().toString()
                 )
         );
-        kafkaTemplate.send(KafkaTopics.LOAN_EVENTS, saved.getId().toString(), event);
+        outboxService.saveEvent(event, KafkaTopics.LOAN_EVENTS, saved.getId().toString());
 
         log.info("Loan application submitted: {}", saved.getApplicationNumber());
         return saved;

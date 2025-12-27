@@ -189,9 +189,55 @@ services:
     networks:
       - loanllaunch-network
 
+  # Data Ingestion Service
+  postgres-ingestion:
+    image: postgres:16-alpine
+    container_name: postgres-ingestion
+    environment:
+      POSTGRES_DB: ingestion_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres-ingestion-data:/var/lib/postgresql/data
+    networks:
+      - loanllaunch-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  data-ingestion-service:
+    build:
+      context: .
+      dockerfile: data-ingestion-service/Dockerfile
+    container_name: data-ingestion-service
+    depends_on:
+      postgres-ingestion:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    ports:
+      - "8083:8083"
+    environment:
+      DB_HOST: postgres-ingestion
+      DB_PORT: 5432
+      DB_NAME: ingestion_db
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      SERVER_PORT: 8083
+    networks:
+      - loanllaunch-network
+
 networks:
   loanllaunch-network:
     driver: bridge
 
 volumes:
   postgres-organization-data:
+  postgres-auth-data:
+  postgres-loan-data:
+  postgres-ingestion-data:

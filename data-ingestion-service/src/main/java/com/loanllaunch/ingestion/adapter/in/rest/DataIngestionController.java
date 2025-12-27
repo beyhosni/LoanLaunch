@@ -14,12 +14,11 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class DataIngestionController {
     
-    private final KafkaTemplate<String, Object> kafkaTemplate;
+    private final com.loanllaunch.ingestion.application.service.IngestionService ingestionService;
 
     @PostMapping("/sync/{organizationId}")
     public ResponseEntity<ApiResponse<String>> syncBankData(@PathVariable UUID organizationId) {
-        log.info("Simulating bank data sync for organization: {}", organizationId);
-        // Simulate data ingestion and publish event
-        return ResponseEntity.ok(ApiResponse.success("Bank data sync initiated", "Data ingestion started"));
+        ingestionService.triggerIngestion(organizationId);
+        return ResponseEntity.ok(ApiResponse.success("Bank data ingestion triggered", null));
     }
 }
