@@ -180,31 +180,63 @@ graph TB
 </tbody>
 </table>
 
+---
+
 ## 🚀 Démarrage Rapide
 
-### Prérequis
+### 📋 Prérequis
 
-- Java 21
-- Maven 3.9+
-- Docker & Docker Compose
+| Outil | Version Minimum | Vérification |
+|-------|----------------|--------------|
+| ☕ Java | 21 | `java --version` |
+| 📦 Maven | 3.9+ | `mvn --version` |
+| 🐳 Docker | 20.10+ | `docker --version` |
+| 🐙 Docker Compose | 2.0+ | `docker-compose --version` |
 
-### 1. Build du projet
+### ⚡ Installation en 3 Étapes
+
+#### 1️⃣ Build du projet
 
 ```bash
-mvn clean package -DskipTests
+# Clone le repository
+git clone <your-repo-url>
+cd LoanLaunch
+
+# Build tous les services (compilation parallèle)
+mvn clean package -T 4 -DskipTests
 ```
 
-### 2. Lancer l'infrastructure
+**Temps estimé:** ~2-3 minutes
+
+#### 2️⃣ Lancer l'infrastructure
 
 ```bash
+# Démarrer tous les services
 docker-compose up -d
-```
 
-### 3. Vérifier les services
-
-```bash
+# Vérifier le statut
 docker-compose ps
 ```
+
+**Services démarrés:**
+- ✅ 8 Microservices
+- ✅ 8 Bases PostgreSQL
+- ✅ Kafka + Zookeeper
+- ✅ Kafka UI
+
+#### 3️⃣ Vérifier le déploiement
+
+```bash
+# Health checks
+curl http://localhost:8082/api/actuator/health  # Organization Service
+curl http://localhost:8081/api/actuator/health  # Auth Service
+curl http://localhost:8087/api/actuator/health  # Loan Service
+
+# Kafka UI
+open http://localhost:8090
+```
+
+> 💡 **Astuce:** Tous les services exposent leur documentation Swagger sur `/api/swagger-ui.html`
 
 ## 📡 Endpoints Principaux
 
