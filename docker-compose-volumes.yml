@@ -1,0 +1,9 @@
+volumes:
+  postgres-organization-data:
+  postgres-auth-data:
+  postgres-loan-data:
+  postgres-ingestion-data:
+  postgres-scoring-data:
+  postgres-decision-data:
+  postgres-notification-data:
+  postgres-audit-data:

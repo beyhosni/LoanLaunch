@@ -1,229 +1,252 @@
 # LoanLaunch - AI-Powered Intelligent Lending Platform
 
-LoanLaunch is an intelligent lending platform for small businesses that automates risk assessment using alternative data sources (cash-flow, SaaS metrics, open banking) to provide loan decisions within hours instead of weeks.
+## 🎯 Overview
+
+LoanLaunch est une plateforme de prêt intelligente pour petites entreprises basée sur l'IA et l'analyse de données alternatives (cash-flow, SaaS, open banking). La plateforme automatise l'évaluation du risque pour fournir une décision de prêt en quelques heures au lieu de plusieurs semaines.
 
 ## 🏗️ Architecture
 
-This is a microservices-based platform built with:
-- **Java 21**
-- **Spring Boot 3.2.1**
-- **Spring Cloud Gateway**
-- **Apache Kafka** (event-driven architecture)
-- **PostgreSQL** (one database per service)
-- **Docker** & **Docker Compose**
+**Stack Technique :**
+- Java 21
+- Spring Boot 3.2.1
+- Apache Kafka (event-driven)
+- PostgreSQL (1 DB par service)
+- Docker & Docker Compose
+- Architecture Hexagonale
 
-### Microservices
+### Microservices (8 services)
 
-1. **API Gateway** - Single entry point, routing, and authentication
-2. **Auth/IAM Service** - User authentication and authorization
-3. **Organization Service** - Manage organizations and users ✅
-4. **Data Ingestion Service** - Simulate open banking data ingestion
-5. **Data Normalization Service** - Normalize and analyze financial data
-6. **Risk Scoring Service** - Calculate risk scores using rule-based logic
-7. **Decision Engine Service** - Automated loan approval decisions
-8. **Loan Origination Service** - Manage loan applications
-9. **Notification Service** - Send notifications (email, SMS)
-10. **Audit Service** - Event logging and audit trail
+| Service | Port | Description |
+|---------|------|-------------|
+| **organization-service** | 8082 | Gestion des organisations et utilisateurs |
+| **auth-service** | 8081 | Authentification JWT et gestion des utilisateurs |
+| **loan-origination-service** | 8087 | Gestion des demandes de prêt |
+| **data-ingestion-service** | 8083 | Ingestion de données bancaires (simulé) |
+| **risk-scoring-service** | 8085 | Calcul des scores de risque |
+| **decision-engine-service** | 8086 | Moteur de décision automatique |
+| **notification-service** | 8088 | Envoi de notifications |
+| **audit-service** | 8089 | Journalisation et audit trail |
 
-## 🚀 Quick Start
+## 🚀 Démarrage Rapide
 
-### Prerequisites
+### Prérequis
 
-- **Java 21** (JDK)
-- **Maven 3.9+**
-- **Docker** & **Docker Compose**
+- Java 21
+- Maven 3.9+
+- Docker & Docker Compose
 
-### Running Locally
+### 1. Build du projet
 
-1. **Clone the repository**
-   ```bash
-   git clone <repository-url>
-   cd LoanLaunch
-   ```
+```bash
+mvn clean package -DskipTests
+```
 
-2. **Build the project**
-   ```bash
-   mvn clean install
-   ```
+### 2. Lancer l'infrastructure
 
-3. **Start infrastructure and services**
-   ```bash
-   docker-compose up -d
-   ```
+```bash
+docker-compose up -d
+```
 
-4. **Verify services are running**
-   ```bash
-   docker-compose ps
-   ```
+### 3. Vérifier les services
 
-### Accessing Services
+```bash
+docker-compose ps
+```
 
-- **Organization Service API**: http://localhost:8082/api
-- **Organization Service Swagger UI**: http://localhost:8082/api/swagger-ui.html
+## 📡 Endpoints Principaux
+
+### Organization Service (8082)
+- `POST /api/organizations` - Créer une organisation
+- `GET /api/organizations/{id}` - Obtenir une organisation
+- `GET /api/organizations` - Lister les organisations
+
+### Auth Service (8081)
+- `POST /api/auth/register` - Inscription utilisateur
+- `POST /api/auth/login` - Connexion
+- `POST /api/auth/refresh` - Rafraîchir le token
+
+### Loan Origination Service (8087)
+- `POST /api/loans` - Créer une demande de prêt
+- `POST /api/loans/{id}/submit` - Soumettre une demande
+- `GET /api/loans/{id}` - Obtenir une demande
+- `GET /api/loans/organization/{orgId}` - Lister les demandes par organisation
+
+### Data Ingestion Service (8083)
+- `POST /api/ingestion/sync/{organizationId}` - Synchroniser les données bancaires
+
+## 🔄 Flow End-to-End
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Auth
+    participant Org
+    participant Loan
+    participant Ingestion
+    participant Scoring
+    participant Decision
+    participant Notification
+    participant Kafka
+
+    Client->>Auth: POST /auth/register
+    Auth->>Kafka: UserRegisteredEvent
+    Auth-->>Client: JWT Token
+
+    Client->>Org: POST /organizations
+    Org->>Kafka: OrganizationCreatedEvent
+    Org-->>Client: Organization
+
+    Client->>Ingestion: POST /ingestion/sync/{orgId}
+    Ingestion->>Kafka: BankDataIngestedEvent
+
+    Kafka->>Scoring: Consume BankDataIngested
+    Scoring->>Kafka: RiskScoreCalculatedEvent
+
+    Kafka->>Decision: Consume RiskScoreCalculated
+    Decision->>Kafka: LoanDecisionMadeEvent
+
+    Client->>Loan: POST /loans
+    Loan->>Kafka: LoanApplicationCreatedEvent
+    Loan-->>Client: LoanApplication
+
+    Client->>Loan: POST /loans/{id}/submit
+    Loan->>Kafka: LoanApplicationSubmittedEvent
+
+    Kafka->>Notification: Consume Events
+    Notification->>Client: Email Notification
+```
+
+## 📊 Événements Kafka
+
+### Topics
+
+- `organization-events` - Événements d'organisation
+- `user-events` - Événements utilisateur
+- `loan-events` - Événements de prêt
+- `data-ingestion-events` - Événements d'ingestion
+- `risk-scoring-events` - Événements de scoring
+- `decision-events` - Événements de décision
+
+## 🗄️ Bases de Données
+
+Chaque service a sa propre base PostgreSQL :
+
+- `organization_db` (port 5432)
+- `auth_db` (port 5433)
+- `ingestion_db` (port 5434)
+- `scoring_db` (port 5435)
+- `decision_db` (port 5436)
+- `loan_db` (port 5437)
+- `notification_db` (port 5438)
+- `audit_db` (port 5439)
+
+## 📝 Documentation API
+
+Chaque service expose sa documentation Swagger :
+
+- Organization: http://localhost:8082/api/swagger-ui.html
+- Auth: http://localhost:8081/api/swagger-ui.html
+- Loan: http://localhost:8087/api/swagger-ui.html
+
+## 🔍 Monitoring
+
 - **Kafka UI**: http://localhost:8090
-- **PostgreSQL**: localhost:5432 (user: postgres, password: postgres)
+- **Health Checks**: `/api/actuator/health` sur chaque service
 
-## 📋 Testing the Organization Service
+## 🧪 Tests
 
-### Create an Organization
+### Test Complet du Flow
 
+1. **Créer une organisation**
 ```bash
 curl -X POST http://localhost:8082/api/organizations \
   -H "Content-Type: application/json" \
   -d '{
-    "name": "Acme Corp",
-    "legalName": "Acme Corporation Inc.",
+    "name": "Tech Startup Inc",
+    "legalName": "Tech Startup Incorporated",
     "taxId": "12-3456789",
     "industry": "Technology",
-    "foundedDate": "2020-01-15",
-    "employeeCount": 25,
-    "annualRevenue": 1500000.00,
-    "addressLine1": "123 Main St",
-    "city": "San Francisco",
-    "state": "CA",
-    "postalCode": "94102",
-    "country": "USA",
-    "phone": "+1-555-0100",
-    "email": "contact@acmecorp.com",
-    "website": "https://acmecorp.com"
+    "email": "contact@techstartup.com"
   }'
 ```
 
-### Get Organization by ID
-
+2. **Enregistrer un utilisateur**
 ```bash
-curl http://localhost:8082/api/organizations/{id}
-```
-
-### List All Organizations
-
-```bash
-curl "http://localhost:8082/api/organizations?page=0&size=10"
-```
-
-### Update Organization
-
-```bash
-curl -X PUT http://localhost:8082/api/organizations/{id} \
+curl -X POST http://localhost:8081/api/auth/register \
   -H "Content-Type: application/json" \
   -d '{
-    "name": "Acme Corporation",
-    "employeeCount": 30
+    "email": "john@techstartup.com",
+    "password": "SecurePass123!",
+    "role": "BORROWER",
+    "organizationId": "<ORG_ID>"
   }'
 ```
 
-### Delete Organization
-
+3. **Créer une demande de prêt**
 ```bash
-curl -X DELETE http://localhost:8082/api/organizations/{id}
+curl -X POST "http://localhost:8087/api/loans?organizationId=<ORG_ID>&requestedAmount=50000&requestedTermMonths=24&purpose=Equipment+purchase"
 ```
 
-## 📊 Kafka Events
+4. **Soumettre la demande**
+```bash
+curl -X POST http://localhost:8087/api/loans/<LOAN_ID>/submit
+```
 
-The Organization Service publishes the following events to Kafka:
+## �️ Développement
 
-- **OrganizationCreatedEvent** - Published when a new organization is created
-- **OrganizationUpdatedEvent** - Published when an organization is updated
-
-You can monitor these events in the Kafka UI at http://localhost:8090
-
-## 🗂️ Project Structure
+### Structure du Projet
 
 ```
 loan-launch/
-├── pom.xml                          # Parent POM
-├── docker-compose.yml               # Infrastructure setup
-├── loan-launch-common/              # Shared utilities
-├── loan-launch-events/              # Event definitions
-└── organization-service/            # Organization microservice
-    ├── src/
-    │   ├── main/
-    │   │   ├── java/
-    │   │   │   └── com/loanllaunch/organization/
-    │   │   │       ├── adapter/
-    │   │   │       │   ├── in/rest/        # REST controllers & DTOs
-    │   │   │       │   └── out/
-    │   │   │       │       ├── kafka/      # Kafka publishers
-    │   │   │       │       └── persistence/ # JPA repositories
-    │   │   │       ├── application/
-    │   │   │       │   └── service/        # Business logic
-    │   │   │       └── domain/
-    │   │   │           └── model/          # Domain entities
-    │   │   └── resources/
-    │   │       ├── application.yml
-    │   │       └── db/migration/           # Flyway migrations
-    │   └── test/
-    ├── Dockerfile
-    └── pom.xml
+├── loan-launch-common/          # Bibliothèque partagée
+├── loan-launch-events/          # Événements Kafka
+├── organization-service/        # Service organisations
+├── auth-service/                # Service authentification
+├── loan-origination-service/    # Service prêts
+├── data-ingestion-service/      # Service ingestion
+├── risk-scoring-service/        # Service scoring
+├── decision-engine-service/     # Service décision
+├── notification-service/        # Service notifications
+└── audit-service/               # Service audit
 ```
 
-## 🛠️ Development
-
-### Building a Single Service
+### Build d'un Service Spécifique
 
 ```bash
-mvn clean package -pl organization-service -am
+mvn clean package -pl <service-name> -am -DskipTests
 ```
 
-### Running Tests
+### Logs
 
 ```bash
-mvn test
-```
-
-### Viewing Logs
-
-```bash
-# All services
+# Tous les services
 docker-compose logs -f
 
-# Specific service
+# Service spécifique
 docker-compose logs -f organization-service
 ```
 
-### Stopping Services
+## 🔐 Sécurité
 
-```bash
-docker-compose down
-```
+- Authentification JWT sur tous les endpoints (sauf /auth/*)
+- Tokens avec expiration (24h pour access, 7j pour refresh)
+- Rôles: BORROWER, UNDERWRITER, ADMIN
+- Passwords hashés avec BCrypt
 
-### Cleaning Up (including volumes)
+## 📈 Prochaines Étapes
 
-```bash
-docker-compose down -v
-```
+- [ ] Implémenter API Gateway avec Spring Cloud Gateway
+- [ ] Ajouter la logique métier complète pour chaque service
+- [ ] Implémenter les consumers Kafka pour le flow event-driven
+- [ ] Ajouter les tests d'intégration
+- [ ] Implémenter le frontend
+- [ ] Ajouter monitoring (Prometheus/Grafana)
+- [ ] Ajouter distributed tracing (Zipkin)
 
-## 📚 API Documentation
+## � License
 
-Each service provides OpenAPI documentation via Swagger UI:
-
-- Organization Service: http://localhost:8082/api/swagger-ui.html
-
-## 🔧 Configuration
-
-Services can be configured via environment variables in `docker-compose.yml`:
-
-- `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD` - Database configuration
-- `KAFKA_BOOTSTRAP_SERVERS` - Kafka connection
-- `SERVER_PORT` - Service port
-
-## 📈 Monitoring
-
-- **Health Checks**: Each service exposes `/api/actuator/health`
-- **Kafka UI**: Monitor topics, messages, and consumers at http://localhost:8090
-
-## 🎯 Next Steps
-
-1. Implement remaining microservices (Auth, Data Ingestion, etc.)
-2. Add API Gateway with Spring Cloud Gateway
-3. Implement end-to-end loan application flow
-4. Add comprehensive testing
-5. Add security (JWT, OAuth2)
-
-## 📝 License
-
-[Your License Here]
+[Your License]
 
 ## 👥 Contributors
 
-[Your Team Here]
+[Your Team]

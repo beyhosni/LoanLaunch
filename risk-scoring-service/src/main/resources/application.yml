@@ -1,0 +1,23 @@
+spring:
+  application:
+    name: risk-scoring-service
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5435}/${DB_NAME:scoring_db}
+    username: ${DB_USER:postgres}
+    password: ${DB_PASSWORD:postgres}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    consumer:
+      group-id: risk-scoring-service
+      properties:
+        spring.json.trusted.packages: "*"
+server:
+  port: ${SERVER_PORT:8085}
+  servlet:
+    context-path: /api
