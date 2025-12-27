@@ -17,6 +17,13 @@
         <module>loan-launch-common</module>
         <module>loan-launch-events</module>
         <module>organization-service</module>
+        <module>auth-service</module>
+        <module>loan-origination-service</module>
+        <module>data-ingestion-service</module>
+        <module>risk-scoring-service</module>
+        <module>decision-engine-service</module>
+        <module>notification-service</module>
+        <module>audit-service</module>
     </modules>
 
     <properties>
