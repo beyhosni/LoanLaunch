@@ -6,14 +6,8 @@ FROM maven:3.9.6-eclipse-temurin-21-alpine AS build
 WORKDIR /app
 
 # Copy parent POM
-COPY pom.xml .
-
-# Copy shared modules
-COPY loan-launch-common ./loan-launch-common
-COPY loan-launch-events ./loan-launch-events
-
-# Copy auth service
-COPY auth-service ./auth-service
+# Copy entire project source
+COPY . .
 
 # Build the application
 RUN mvn clean package -pl auth-service -am -DskipTests

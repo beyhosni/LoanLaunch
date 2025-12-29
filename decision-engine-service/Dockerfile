@@ -1,9 +1,6 @@
 FROM maven:3.9.6-eclipse-temurin-21-alpine AS build
 WORKDIR /app
-COPY pom.xml .
-COPY loan-launch-common ./loan-launch-common
-COPY loan-launch-events ./loan-launch-events
-COPY decision-engine-service ./decision-engine-service
+COPY . .
 RUN mvn clean package -pl decision-engine-service -am -DskipTests
 FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app

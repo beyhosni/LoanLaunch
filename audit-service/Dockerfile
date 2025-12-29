@@ -1,9 +1,6 @@
 FROM maven:3.9.6-eclipse-temurin-21-alpine AS build
 WORKDIR /app
-COPY pom.xml .
-COPY loan-launch-common ./loan-launch-common
-COPY loan-launch-events ./loan-launch-events
-COPY audit-service ./audit-service
+COPY . .
 RUN mvn clean package -pl audit-service -am -DskipTests
 FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app

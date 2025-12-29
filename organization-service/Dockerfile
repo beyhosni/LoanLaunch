@@ -6,14 +6,8 @@ FROM maven:3.9.6-eclipse-temurin-21-alpine AS build
 WORKDIR /app
 
 # Copy parent POM
-COPY pom.xml .
-
-# Copy shared modules
-COPY loan-launch-common ./loan-launch-common
-COPY loan-launch-events ./loan-launch-events
-
-# Copy organization service
-COPY organization-service ./organization-service
+# Copy entire project source to ensure all modules are present for reactor
+COPY . .
 
 # Build the application (skip tests for faster builds)
 RUN mvn clean package -pl organization-service -am -DskipTests
